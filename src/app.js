@@ -15,6 +15,7 @@ app.get('/config', (req, res) => {
   res.json({ publishableKey: config.stripe.publishableKey });
 });
 
+
 app.post("/create-payment-intent",async(req,res)=>{
   const {amount} = req.body;
 
@@ -34,6 +35,23 @@ app.post("/create-payment-intent",async(req,res)=>{
     res.status(500).send({error:err.message})
   }
 })
+
+app.post("/refund",async(req,res)=>{
+
+  try{
+    const {paymentIntentId,refundAmount} = req.body;
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      amount: refundAmount,
+    });
+    console.log('Refund successful:', refund);
+    res.json({message:"refunded successfully",refund});
+  }catch(err){
+    console.log(err);
+    res.status(500).json({message:err.message})
+  }
+}
+)
 
 app.listen(3000,()=>{
   console.log("server is listening on port 3000")
